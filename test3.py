@@ -84,3 +84,10 @@ a.write_ply()
 a.show_point_cloud()
 df = a.df
 np.save('pc.npy',df)
+
+# pcd_dir = dataset_path + "/000"+str(i)+"/pcd"
+# os.system('rm -r /home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000000x/pcd')
+# print(pcd_path)
+# os.mkdir(pcd_dir)
+#pcd_path = glob.glob("/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000000x/depth/*pcd")
+#f = 0

@@ -5,12 +5,15 @@ import open3d as o3d
 import cv2
 import json
 import os
-file = open("/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000000/scene_camera.json")
+
+dataset_path = "/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000"
+
+file = open(dataset_path+"000/scene_camera.json")
 data = json.load(file)
-print(data['0']['cam_K'])
+print("intrinsic camera parameters", data['0']['cam_K'])
 mat = data['0']['cam_K']
 depth_scale = data['0']['depth_scale']
-print(depth_scale)
+print("depth_scale", depth_scale)
 file.close()
 intrinsics = o3d.camera.PinholeCameraIntrinsic(640, 480, mat[0], mat[4], mat[2], mat[5])
 
@@ -23,16 +26,6 @@ def read_instances(path, iteration):
     else:
         path = path + str(iteration)
     return path
-
-
-dataset_path = "/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000"
-
-# pcd_dir = dataset_path + "/000"+str(i)+"/pcd"
-# os.system('rm -r /home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000000x/pcd')
-# print(pcd_path)
-# os.mkdir(pcd_dir)
-#pcd_path = glob.glob("/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000000x/depth/*pcd")
-#f = 0
 
 
 def read_image(path, iteration, imagetype):
