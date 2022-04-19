@@ -9,6 +9,8 @@ file = open("/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000000/scene_camera.
 data = json.load(file)
 print(data['0']['cam_K'])
 mat = data['0']['cam_K']
+depth_scale = data['0']['depth_scale']
+print(depth_scale)
 file.close()
 intrinsics = o3d.camera.PinholeCameraIntrinsic(640, 480, mat[0], mat[4], mat[2], mat[5])
 
