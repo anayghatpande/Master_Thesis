@@ -5,7 +5,7 @@ import open3d as o3d
 import cv2
 import json
 import os
-
+import shutil
 dataset_path = "/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/000"
 
 file = open(dataset_path+"000/scene_camera.json")
@@ -45,6 +45,8 @@ def write_pcd_image(path, iteration):
         path = path + "0" + str(iteration) + str(".pcd")
     else:
         path = path + str(iteration) + str(".pcd")
+    shutil.rmtree(path, ignore_errors=True)
+    os.mkdir(path)
     return path
 
 
@@ -56,7 +58,7 @@ for i in range(0, 50):
     rgb_path = str(read_instances(dataset_path, i)) + "/rgb/000"
     depth_path = str(read_instances(dataset_path, i)) + "/depth/000"
     pcd_dir = str(read_instances(dataset_path, i)) + "/pcd"
-    os.mkdir(pcd_dir)
+    #os.mkdir(pcd_dir)
     # print(pcd_dir)
     pcd_path = str(read_instances(dataset_path, i)) + "/pcd/000"
     # print(rgb_path)
@@ -71,7 +73,7 @@ for i in range(0, 50):
         # cv2.waitKey(2000)
         # cv2.destroyAllWindows()
 
-        depth_raw = cv2.imread(read_image(depth_path, f, ".png"), -1)/1000000
+        depth_raw = cv2.imread(read_image(depth_path, f, ".png"), -1)/100000
         depth_raw = np.float32(depth_raw)
         depth_raw = o3d.geometry.Image(depth_raw)
     #

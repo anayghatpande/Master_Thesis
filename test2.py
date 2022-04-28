@@ -2,7 +2,7 @@ from PIL import Image
 import pandas as pd
 import numpy as np
 import open3d as o3d
-from open3d import read_point_cloud, draw_geometries
+#from open3d import read_point_cloud, draw_geometries
 import time
 print("Load a ply point cloud, print it, and render it")
 ply_point_cloud = o3d.data.PLYPointCloud()
