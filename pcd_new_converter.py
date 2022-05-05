@@ -60,6 +60,11 @@ def pcd_writer(path):
     os.mkdir(path)
     return path
 
+def bin_remover(path):
+    # removing all old pcd images
+    shutil.rmtree(path, ignore_errors=True)
+    #os.mkdir(path)
+    return path
 
 dataset = list(dataset_read)
 config = load_json(dataset_path)
@@ -73,7 +78,7 @@ def converter():
         pcd_path = str(dataset[i]) + "/pcd"
         bin_path = str(dataset[i]) + "/bin"
         pcd_img = pcd_writer(pcd_path)
-        bin_files = pcd_writer(bin_path)
+        bin_files = bin_remover(bin_path)
 
         for j in range(len(depth_images)):
             color_raw = cv2.imread(rgb_images[j])
@@ -87,10 +92,29 @@ def converter():
             rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(color_raw, depth_raw, depth_scale=config[0],
                                                                             convert_rgb_to_intensity=False)
             pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, config[2])
-            o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".pcd", pcd)
+            pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
 
-            my_point_cloud = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".pcd")
-            my_point_cloud.to_file(str(bin_files) + "/" + str(j) + ".bin")
+            # downpcd = o3d.geometry.PointCloud.voxel_down_sample(pcd, voxel_size=0.05)
+            # o3d.geometry.PointCloud.estimate_normals(
+            #     downpcd,
+            #     search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1,
+            #                                                       max_nn=30))
+            o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".ply", pcd)
+            #scene = o3d.io.read_point_cloud(str(pcd_img) + "/" + str(j) + ".ply")
+            #o3d.visualization.draw_geometries([scene]) # debug
+
+            # alpha = 0.03
+            # mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(pcd, alpha)
+            # mesh.compute_vertex_normals()
+            # o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".ply", mesh)
+            # my_point_cloud = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".pcd")
+            #
+            # my_point_cloud.to_file(str(bin_files) + "/" + str(j) + ".bin")
+            # #pcd2 = o3d.io.read_point_cloud(str(bin_files) + "/" + str(j) + ".txt", format='xyzrgb')
+            # my_point_cloud2 = PyntCloud.from_file(str(bin_files) + "/" + str(j) + ".bin")
+            #print(my_point_cloud2) #debug
+            #open_cloud = PyntCloud.from_file(str(bin_files) + "/" + str(j) + ".bin")
+            #print(open_cloud)
 
 
         print("writing point-clouds in scene", i)
