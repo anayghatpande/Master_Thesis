@@ -6,15 +6,20 @@ import cv2
 import json
 import os
 import shutil
+from pyntcloud import PyntCloud
 dataset = input("Choose Dataset or enter path:")
 if dataset == str(1):
     dataset_path = "/home/iiwa-2/Downloads/Datasets/hope_val/val/"
+    model_path = sorted(glob.glob("/home/iiwa-2/Downloads/hope_models/models/*ply"))
     print("Selected Dataset is: HOPE")
 elif dataset == str(2):
     dataset_path = "/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/"
+    model_path = sorted(glob.glob("/home/iiwa-2/Downloads/ycbv_models/models/*ply"))
     print("Selected Dataset is: YCB-V")
 else:
     dataset_path = dataset
+    model_path = input("enter models path:")
+
 
 #dataset_path = "/home/iiwa-2/Downloads/hope_val/val/000001"
 dataset_read = sorted(glob.glob(dataset_path + "/*"))
@@ -59,27 +64,42 @@ def pcd_writer(path):
 dataset = list(dataset_read)
 config = load_json(dataset_path)
 
-for i in range(len(dataset)):
-    rgb_images = rgb_reader(dataset[i])
-    depth_images = depth_reader(dataset[i])
-    pcd_path = str(dataset[i]) + "/pcd"
-    pcd_img = pcd_writer(pcd_path)
 
-    for j in range(len(depth_images)):
-        color_raw = cv2.imread(rgb_images[j])
-        img = np.array(color_raw)
-        color_raw = cv2.cvtColor(color_raw, cv2.COLOR_BGR2RGB)
-        color_raw = o3d.geometry.Image(color_raw)
-        depth_raw = cv2.imread(depth_images[j], -1) /int(config[1])
-        # img2 = np.array(depth_raw)
-        depth_raw = np.float32(depth_raw)
-        depth_raw = o3d.geometry.Image(depth_raw)
-        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(color_raw, depth_raw, depth_scale=config[0],
-                                                                        convert_rgb_to_intensity=False)
-        pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, config[2])
-        o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".pcd", pcd)
+#@jit(nopython=True)
+def converter():
+    for i in range(len(dataset)):
+        rgb_images = rgb_reader(dataset[i])
+        depth_images = depth_reader(dataset[i])
+        pcd_path = str(dataset[i]) + "/pcd"
+        bin_path = str(dataset[i]) + "/bin"
+        pcd_img = pcd_writer(pcd_path)
+        bin_files = pcd_writer(bin_path)
 
-    print("writing point-clouds in scene", i)
-#        o3d.visualization.draw_geometries([pcd]) #debug
+        for j in range(len(depth_images)):
+            color_raw = cv2.imread(rgb_images[j])
+            img = np.array(color_raw)
+            color_raw = cv2.cvtColor(color_raw, cv2.COLOR_BGR2RGB)
+            color_raw = o3d.geometry.Image(color_raw)
+            depth_raw = cv2.imread(depth_images[j], -1) /int(config[1])
+            # img2 = np.array(depth_raw)
+            depth_raw = np.float32(depth_raw)
+            depth_raw = o3d.geometry.Image(depth_raw)
+            rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(color_raw, depth_raw, depth_scale=config[0],
+                                                                            convert_rgb_to_intensity=False)
+            pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, config[2])
+            o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".pcd", pcd)
 
-print("Conversion Successful")
+            my_point_cloud = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".pcd")
+            my_point_cloud.to_file(str(bin_files) + "/" + str(j) + ".bin")
+
+
+        print("writing point-clouds in scene", i)
+    #        o3d.visualization.draw_geometries([pcd]) #debug
+
+
+    print("Conversion Successful")
+
+
+
+if __name__ == "__main__":
+    converter()
