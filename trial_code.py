@@ -272,7 +272,7 @@
 # # #o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".pcd", pcd)
 # # #o3d.visualization.draw_geometries([pcd])
 # # #print(rgb_reader(data[i]), '\n')
-
+import glob
 
 import numpy as np
 import pandas as pd
@@ -282,10 +282,10 @@ import pprint
 from pyntcloud import PyntCloud
 
 
-scene = o3d.io.read_point_cloud("/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/pcd/0.ply")
-scene_converted = o3d.io.read_point_cloud("/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/pcd_annotated/0.ply")
-#df = pd.DataFrame(cloud.points)
-o3d.visualization.draw_geometries([scene, scene_converted])
+# scene = o3d.io.read_point_cloud("/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/pcd/0.ply")
+# scene_converted = o3d.io.read_point_cloud("/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/pcd_annotated/0.ply")
+# #df = pd.DataFrame(cloud.points)
+# o3d.visualization.draw_geometries([scene, scene_converted])
 
 
 # cloud = PyntCloud(pd.DataFrame(
@@ -294,4 +294,13 @@ o3d.visualization.draw_geometries([scene, scene_converted])
 #     columns=["x", "y", "z", "red", "green", "blue"]))
 #print(df)
 #cloud.to_file("output.ply")
-
+# dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
+# cloud2 = PyntCloud.from_file(dataset_path[0] + "/pcd_annotated/"+str(0)+".ply")
+# df2 = pd.DataFrame(cloud2.points)
+# print(df2)
+outfile = "/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/npz/0.npz"
+npzfile = np.load(outfile)
+print(npzfile.files)
+print(npzfile['points'])
+df = pd.DataFrame(npzfile['points'])
+print(df)
