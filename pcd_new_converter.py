@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 from pyntcloud import PyntCloud
+import pandas as pd
 dataset = input("Choose Dataset or enter path:")
 if dataset == str(1):
     dataset_path = "/home/iiwa-2/Downloads/Datasets/hope_val/val/"
@@ -76,9 +77,9 @@ def converter():
         rgb_images = rgb_reader(dataset[i])
         depth_images = depth_reader(dataset[i])
         pcd_path = str(dataset[i]) + "/pcd"
-        bin_path = str(dataset[i]) + "/bin"
+        npy_path = str(dataset[i]) + "/npy"
         pcd_img = pcd_writer(pcd_path)
-        bin_files = bin_remover(bin_path)
+        npy_files = pcd_writer(npy_path)
 
         for j in range(len(depth_images)):
             color_raw = cv2.imread(rgb_images[j])
@@ -100,6 +101,26 @@ def converter():
             #     search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1,
             #                                                       max_nn=30))
             o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".ply", pcd)
+            #print(pd.DataFrame(pcd.points))
+            cloud_new = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".ply")
+            cloud_2 = PyntCloud(pd.DataFrame(cloud_new.points))
+            #print(cloud_2)
+            cloud_2.to_file(str(npy_files) + "/" + str(j) + ".npz")
+
+            #debugging
+            npzfile = np.load(str(npy_files) + "/" + str(j) + ".npz")
+            os.remove(str(npy_files) + "/" + str(j) + ".npz")
+
+
+            # print(npzfile.files)
+            # print(npzfile['points'])
+            with open(str(npy_files) + "/" + str(j) + ".npy", 'wb') as file:
+                np.save(file, npzfile['points'])
+                file.close()
+
+
+
+
             #scene = o3d.io.read_point_cloud(str(pcd_img) + "/" + str(j) + ".ply")
             #o3d.visualization.draw_geometries([scene]) # debug
 
