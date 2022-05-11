@@ -28,9 +28,9 @@ def json_loader():
         json_path = path + "/scene_gt.json"
         print(json_path)
         file = open(json_path)
-        shutil.rmtree(path + "/pcd_annotated", ignore_errors=True)
+        #shutil.rmtree(path + "/pcd_annotated", ignore_errors=True)
         print("Removing old pcd_annotated")
-        os.mkdir(path + "/pcd_annotated")
+        #os.mkdir(path + "/pcd_annotated")
         dict = json.load(file)
         #print(dict, len(dict['1']))
 
@@ -48,6 +48,7 @@ def json_loader():
             pcd_path = path+"/pcd/" + str(scene_id) + ".ply"
             cloud = PyntCloud.from_file(pcd_path)
             df = pd.DataFrame(cloud.points)
+
             #print("scene no. ", scene_id)
             for no_of_objs in range(len(dict[str(scene_id)])):
                 #print(objs, dict[str(scene_id)][objs]['obj_id'])
@@ -72,6 +73,8 @@ def json_loader():
 
             labelsfile = path + "/labels/0"+str(scene_id)+".label"
             os.makedirs(os.path.dirname(labelsfile), exist_ok=True)
+            #print(len(labels))
+            #print(df.shape)
             with open(labelsfile, "w") as f:
                 f.write(str(labels))
                 f.close()
@@ -93,11 +96,13 @@ def json_loader():
             cloud_new = PyntCloud(df)
 
             #o3d.visualization.draw_geometries([cloud_new])
-            cloud_new.to_file(path + "/pcd_annotated/"+str(scene_id)+".ply")
-            os.makedirs(os.path.dirname(path + "/npz/"), exist_ok=True)
-            cloud_new.to_file(path + "/npz/"+str(scene_id)+".npz")
 
-            # cloud2 = PyntCloud.from_file(path + "/pcd_annotated/"+str(scene_id)+".bin")
+            cloud_new.to_file(path + "/pcd_annotated/"+str(scene_id)+".ply")
+            os.makedirs(os.path.dirname(path + "/npz_annotated/"), exist_ok=True)
+            cloud_new.to_file(path + "/npz_annotated/"+str(scene_id)+".txt")
+            cloud_new.to_file(path + "/npz_annotated/"+str(scene_id)+".npz")
+
+            # cloud2 = PyntCloud.from_file(path + "/pcd_annotated/"+str(scene_id)+".ply")
             # df2 = pd.DataFrame(cloud2.points)
             # print(df2)
             #converted_pc = cloud2.to_instance("open3d", mesh=False)
