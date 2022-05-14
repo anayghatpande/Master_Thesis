@@ -95,11 +95,6 @@ def converter():
             pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, config[2])
             pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
 
-            # downpcd = o3d.geometry.PointCloud.voxel_down_sample(pcd, voxel_size=0.05)
-            # o3d.geometry.PointCloud.estimate_normals(
-            #     downpcd,
-            #     search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1,
-            #                                                       max_nn=30))
             o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".ply", pcd)
             #print(pd.DataFrame(pcd.points))
             cloud_new = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".ply")
@@ -117,26 +112,6 @@ def converter():
             with open(str(npy_files) + "/" + str(j) + ".npy", 'wb') as file:
                 np.save(file, npzfile['points'])
                 file.close()
-
-
-
-
-            #scene = o3d.io.read_point_cloud(str(pcd_img) + "/" + str(j) + ".ply")
-            #o3d.visualization.draw_geometries([scene]) # debug
-
-            # alpha = 0.03
-            # mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(pcd, alpha)
-            # mesh.compute_vertex_normals()
-            # o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".ply", mesh)
-            # my_point_cloud = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".pcd")
-            #
-            # my_point_cloud.to_file(str(bin_files) + "/" + str(j) + ".bin")
-            # #pcd2 = o3d.io.read_point_cloud(str(bin_files) + "/" + str(j) + ".txt", format='xyzrgb')
-            # my_point_cloud2 = PyntCloud.from_file(str(bin_files) + "/" + str(j) + ".bin")
-            #print(my_point_cloud2) #debug
-            #open_cloud = PyntCloud.from_file(str(bin_files) + "/" + str(j) + ".bin")
-            #print(open_cloud)
-
 
         print("writing point-clouds in scene", i)
     #        o3d.visualization.draw_geometries([pcd]) #debug
