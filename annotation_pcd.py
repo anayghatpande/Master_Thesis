@@ -15,8 +15,8 @@ from pyntcloud import PyntCloud
 import pandas as pd
 
 #from pcd_new_converter import
-device = o3d.core.Device("CPU:0")
-dtype = o3d.core.float32
+#device = o3d.core.Device("CPU:0")
+#dtype = o3d.core.float32
 dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
 
 object_path = sorted(glob.glob("/home/iiwa-2/Downloads/hope_models/models/*ply"))
@@ -36,7 +36,7 @@ def json_loader():
 
 
         #print(dict['0'][0])
-        pcd = o3d.t.geometry.PointCloud(device)
+        #pcd = o3d.t.geometry.PointCloud(device)
         for scene_id in range(len(dict)):
             global instance_id
             global obj_ids

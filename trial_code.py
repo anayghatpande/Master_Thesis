@@ -273,6 +273,8 @@
 # # #o3d.visualization.draw_geometries([pcd])
 # # #print(rgb_reader(data[i]), '\n')
 import glob
+import gzip
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -295,12 +297,39 @@ from pyntcloud import PyntCloud
 #print(df)
 #cloud.to_file("output.ply")
 # dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
+# print(dataset_path[0])
 # cloud2 = PyntCloud.from_file(dataset_path[0] + "/pcd_annotated/"+str(0)+".ply")
 # df2 = pd.DataFrame(cloud2.points)
 # print(df2)
-outfile = "/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/npz/0.npz"
+outfile = "/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/npz_annotated/0.npz"
 npzfile = np.load(outfile)
-print(npzfile.files)
-print(npzfile['points'])
+#print(npzfile.files)
+#print(npzfile['points'])
 df = pd.DataFrame(npzfile['points'])
 print(df)
+#np.savetxt(r'/home/iiwa-2/Downloads/Datasets/hope_val/val/000001/npz_annotated/demo.txt', df)
+outfile2 = "/mnt/Media/dataset_zips/Open3D-PointNet2-Semantic3D/dataset/semantic_raw/untermaederbrunnen_station3_xyz_intensity_rgb.labels"
+#npzfile2 = np.load()
+print(outfile2.shape)
+# df2 = pd.read_pickle(outfile2, compression='infer')
+# print(df2)
+
+
+# import open3d.ml.torch as ml3d
+# # or import open3d.ml.tf as ml3d
+# import numpy as np
+#
+# num_points = 100000
+# points = np.random.rand(num_points, 3).astype(np.float32)
+#
+# data = [
+#     {
+#         'name': 'my_point_cloud',
+#         'points': points,
+#         'random_colors': np.random.rand(*points.shape).astype(np.float32),
+#         'int_attr': (points[:,0]*5).astype(np.int32),
+#     }
+# ]
+#
+# vis = ml3d.vis.Visualizer()
+# vis.visualize(data)
