@@ -193,7 +193,7 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
 
     cloud_new.to_file(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".txt")
     os.remove(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".ply")
-    #
+
 
     # instance_id.append(obj_ids)
     pcd_tree = o3d.geometry.KDTreeFlann(scene)  # KDTREE of scene
