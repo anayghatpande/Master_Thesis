@@ -189,6 +189,10 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
     print("first check")
     # o3d.visualization.draw_geometries([scene, pcd_t]) # debug
     o3d.io.write_point_cloud(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".ply", pcd_t)
+    cloud_new = PyntCloud.from_file(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".ply")
+
+    cloud_new.to_file(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".txt")
+    os.remove(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".ply")
     #
 
     # instance_id.append(obj_ids)
