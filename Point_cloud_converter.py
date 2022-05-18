@@ -64,7 +64,7 @@ def pcd_writer(path):
 def bin_remover(path):
     # removing all old pcd images
     shutil.rmtree(path, ignore_errors=True)
-    #os.mkdir(path)
+    os.mkdir(path)
     return path
 
 dataset = list(dataset_read)
@@ -78,8 +78,10 @@ def converter():
         depth_images = depth_reader(dataset[i])
         pcd_path = str(dataset[i]) + "/pcd"
         npy_path = str(dataset[i]) + "/npy"
+        anno_path = str(dataset[i]) + "/annotations"
         pcd_img = pcd_writer(pcd_path)
         npy_files = pcd_writer(npy_path)
+        annotations = pcd_writer(anno_path)
 
         for j in range(len(depth_images)):
             color_raw = cv2.imread(rgb_images[j])
@@ -94,27 +96,33 @@ def converter():
                                                                             convert_rgb_to_intensity=False)
             pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, config[2])
             pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
+            #o3d.visualization.draw_geometries([pcd]) #debug
 
             o3d.io.write_point_cloud(str(pcd_img) + "/" + str(j) + ".ply", pcd)
             #print(pd.DataFrame(pcd.points))
             cloud_new = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".ply")
-            cloud_2 = PyntCloud(pd.DataFrame(cloud_new.points))
+            #cloud_2 = PyntCloud(pd.DataFrame(cloud_new))
             #print(cloud_2)
-            cloud_2.to_file(str(npy_files) + "/" + str(j) + ".npz")
-
-            #debugging
-            npzfile = np.load(str(npy_files) + "/" + str(j) + ".npz")
-            os.remove(str(npy_files) + "/" + str(j) + ".npz")
+            #cloud_2.to_file(str(npy_files) + "/" + str(j) + ".npz")
+            cloud_new.to_file(str(npy_files) + "/" + str(j) + ".txt")
+            #
+            # #debugging
+            # npzfile = np.load(str(npy_files) + "/" + str(j) + ".npz")
+            # os.remove(str(npy_files) + "/" + str(j) + ".npz")
 
 
             # print(npzfile.files)
             # print(npzfile['points'])
-            with open(str(npy_files) + "/" + str(j) + ".npy", 'wb') as file:
-                np.save(file, npzfile['points'])
-                file.close()
+            # with open(str(npy_files) + "/" + str(j) + ".npy", 'wb') as file:
+            #     np.save(file, npzfile['points'])
+            #     file.close()
+
+            # with open(str(npy_files) + "/" + str(j) + ".txt", 'wb') as file:
+            #     np.save(file, npzfile['points'])
+            #     file.close()
 
         print("writing point-clouds in scene", i)
-    #        o3d.visualization.draw_geometries([pcd]) #debug
+
 
 
     print("Conversion Successful")

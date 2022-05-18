@@ -4,31 +4,58 @@ import shutil
 
 dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
 dataset_name = "HOPE"
+main_paths = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/mmdet3d/data/s3dis/FLW_dataset/*"))
+for i in range(len(main_paths)):
+    x = os.path.join(main_paths[i], 'Annotations/')
+    #file = open('/home/iiwa-2/Frameworks/mmdetection3d_anay/data/s3dis/meta_data/anno_paths.txt', 'w')
+    for j in sorted(glob.glob(x +'/*')):
+        print(j)
+
+
+    #anno_paths = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/mmdet3d/data/s3dis/FLW_dataset/0"+str(i) +"/Annotations/*"))
+    #print(x)
+    # with open('/home/iiwa-2/Frameworks/mmdetection3d_anay/data/s3dis/meta_data/anno_paths.txt', 'w') as file:
+    #     file.writelines(anno_paths)
+
+    #
+    #     file.write(anno_paths + '\n')
+
 # dataset = input("enter dataset path:")
 # dataset_path = sorted(glob.glob(dataset + "/*"))
 # dataset_name = input("enter dataset name:")
 
-dirName = "/home/iiwa-2/Downloads/Datasets/" + dataset_name
+#dirName = "/home/iiwa-2/Downloads/Datasets/" + dataset_name
 
 def structure_maker():
-    bin_files_path = []
+    txt_files_path = []
     for i in range(len(dataset_path)):
-        dirName = "/home/iiwa-2/Downloads/Datasets/" + dataset_name + "/dataset/sequences/0" + str(i)
+        #dirName = "/home/iiwa-2/Downloads/Datasets/" + dataset_name + "/dataset/sequences/0" + str(i)
+        dirName = "/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/mmdet3d/data/s3dis/FLW_dataset/0" + str(i)
         shutil.rmtree(dirName, ignore_errors=True)
-        os.makedirs(dirName)
-        bin_files_path.append(sorted(glob.glob(dataset_path[i] + "/bin/*")))
+        #os.makedirs(dirName)
+        txt_files_path.append(sorted(glob.glob(dataset_path[i] + "/npy/*")))
         #os.makedirs(dirName + "/pcd_files")
         #os.makedirs(dirName + "velodyne") # debug
-        os.makedirs(dirName + "/labels")
-        src_dir = dataset_path[i] + "/bin"
-        dest_dir = dirName + "/bin"
-        print(src_dir, dest_dir)
+
+        src_dir = dataset_path[i] + "/npy"
+        dest_dir = dirName
+        #print(src_dir, dest_dir)
         files = os.listdir(src_dir)
+        #print(files)
         shutil.copytree(src_dir, dest_dir)
+        #os.makedirs(dirName + "/Annotations/")
+        src_dir2 = dataset_path[i] + "/pcd_annotated"
+        dest_dir2 = dirName + "/Annotations/"
+        print(src_dir2, dest_dir2)
+        files2 = os.listdir(src_dir2)
+        print(files2)
+        shutil.copytree(src_dir2, dest_dir2)
 
-    return bin_files_path, dirName
 
-#bin_path = structure_maker()
+    # return txt_files_path, dirName
+
+
+#structure_maker()
 
 
 def create_train_directory():
@@ -54,7 +81,6 @@ def create_train_directory():
         shutil.copytree(src_dir2, dest_dir2)
 
 
-#print(bin_path)
 #
 # # path to source directory
 # src_dir = 'fol1'
@@ -66,7 +92,7 @@ def create_train_directory():
 # files = os.listdir(src_dir)
 #
 # shutil.copytree(src_dir, dest_dir)
-create_train_directory()
+#create_train_directory()
 
 
 
