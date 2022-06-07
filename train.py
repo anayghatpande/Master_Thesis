@@ -12,19 +12,22 @@ from open3d.ml.torch.pipelines import SemanticSegmentation
 
 framework = "torch" # or tf
 cfg_file = "/home/iiwa-2/Frameworks/Open3D-ML/ml3d/configs/kpvconv_FLW.yml"
+#cfg_file = "/home/iiwa-2/Frameworks/Open3D-ML/ml3d/configs/kpconv_s3dis.yml"
 cfg = _ml3d.utils.Config.load_from_file(cfg_file)
 dataset_name = 'FLWDATASETS3DIS'
 #model = ml3d.models.KPFCNN(**cfg.model)
 dataset_path = "/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/mmdet3d/data/s3dis/s3dis_data"
+#dataset_path_S3DIS ="/home/iiwa-2/Downloads/Stanford3dDataset_v1.2"
 dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path, name=dataset_name)
+#dataset_S3DIS =ml3d.datasets.S3DIS(dataset_path=dataset_path_S3DIS)
 # dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path,
 #                                       cache_dir='./logs/cache',
 #                                       training_split=['00'],
 #                                       validation_split=['01'],
 #                                       test_split=['01'])
 
-train_split = dataset.get_split('training')
-
+#train_split = dataset.get_split('training')
+#train_split = dataset_S3DIS.get_split('training')
 
 
 # training own model
@@ -33,6 +36,7 @@ train_split = dataset.get_split('training')
 
 # create the model with initialization.
 model = KPFCNN(**cfg.model)
+
 #
 pipeline = ml3d.pipelines.SemanticSegmentation(model, dataset=dataset, device="gpu", **cfg.pipeline)
 # pipeline = SemanticSegmentation(model=model,
@@ -48,12 +52,12 @@ pipeline.run_train()
 pipeline.run_test()
 
 # Get data from the dataset using the "test" split
-train_split = dataset.get_split("test")
-data = train_split.get_data(0)
+#train_split = dataset.get_split("test")
+#data = train_split.get_data(0)
 
 # Run the inference
-results = pipeline.run_inference(data)
+#results = pipeline.run_inference(data)
 
 # Print the results
-print(results)
+#print(results)
 
