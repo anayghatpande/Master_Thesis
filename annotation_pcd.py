@@ -82,9 +82,8 @@ def json_loader():
             # object_ids = cloud.add_scalar_field("obj_id", object_id=object_data[1])
             # object_id = cloud.add_structure("obj_id", object_data[1:])
             # print(cloud.points)
-
-            print("PCD Annotated")
-            print(df)
+        print("PCD Annotated", scene_id)
+            #print(df)
 
             # cloud_new = PyntCloud(df)
             #
@@ -184,15 +183,32 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
     pcd_t.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
     obj_ids.append(objts)
     inst = obj_ids.count(objts)
-    print(inst)
+    #print(inst)
     # print('Displaying original and transformed geometries ...')
-    print("first check")
+    print("first check", objts)
     # o3d.visualization.draw_geometries([scene, pcd_t]) # debug
-    o3d.io.write_point_cloud(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".ply", pcd_t)
-    cloud_new = PyntCloud.from_file(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".ply")
 
-    cloud_new.to_file(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".txt")
-    os.remove(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".ply")
+    o3d.io.write_point_cloud(path_annotation + "/object" + str(objts) + "_" + str(inst) + ".ply", pcd_t)
+    cloud_new = PyntCloud.from_file(path_annotation + "/object" + str(objts) + "_" + str(inst) + ".ply")
+    df = pd.DataFrame(cloud_new.points)
+
+    #df2 = df[['x', 'y', 'z']]
+    #print(df[['x', 'y', 'z', 'nx', 'ny', 'nz']])
+    #df2.to_csv(path_annotation + "/object" + str(objts-1) + "_" + str(inst) + ".txt", index=False, header=False, sep=' ')
+
+
+    #cloud_new.to_file(path_annotation + "/" + str(objts) + "_" + str(inst) + ".txt",
+    #                        sep=" ",
+    #                        header=0,
+    #                        points=["x","y","z"])
+
+    #npzfile = np.load(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".npz")
+    #print(npzfile['points'])
+    #x = list(npzfile['points'])
+    os.remove(path_annotation + "/object" + str(objts) + "_" + str(inst) + ".ply")
+    #os.remove(path_annotation + "/obj_" + str(objts) + "_" + str(inst) + ".npz")
+
+
 
 
     # instance_id.append(obj_ids)
@@ -203,13 +219,29 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
         [k, idx, _] = pcd_tree.search_radius_vector_3d(point, 0.005)
         # np.asarray(scene.colors)[idx[1:], :] = [0, 1, 0]
         seg_points[idx[1:]] = objts
+        #print(np.asarray(scene.colors))
 
     seg_idx = np.where(seg_points == objts)[0]
     obj_data = {"type": str(objts),
                 "instance": str(instance_id.count(objts)),
                 "point_indices": list(map(str, seg_idx))
                 }
-    # print(seg_points[seg_idx])
+    #print(seg_points[idx])
+    scene2 = PyntCloud.from_file(pcd_path)
+    #print(seg_idx)
+    color_data= np.asarray(scene.colors)[seg_idx] * 255
+    xyz_data= np.asarray(scene.points)[seg_idx]
+
+    df_obj_color = pd.DataFrame(color_data, dtype=int, index=None)
+    df_obj_xyz = pd.DataFrame(xyz_data, index=None)
+    df_obj = pd.concat([df_obj_xyz, df_obj_color], axis=1)
+    #print(df_obj)
+    df_obj.to_csv(path_annotation + "/object" + str(objts-1) + "_" + str(inst) + ".txt", index=False, header=False, sep=' ')
+
+    # for colors in scene.points:
+    #
+    df_color = pd.DataFrame(scene2.points)
+    #print(df_color[['red', 'green', 'blue']])
 
     # debugging
     # pcd_read = o3d.io.read_point_cloud(path+"/pcd/" + str(objts) + ".ply")
