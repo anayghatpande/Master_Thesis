@@ -78,9 +78,11 @@ def converter():
         depth_images = depth_reader(dataset[i])
         pcd_path = str(dataset[i]) + "/pcd"
         npy_path = str(dataset[i]) + "/npy"
+        bin_path = str(dataset[i]) + "/bin"
         anno_path = str(dataset[i]) + "/annotations"
         pcd_img = pcd_writer(pcd_path)
         npy_files = pcd_writer(npy_path)
+        bin_files = pcd_writer(bin_path)
         annotations = pcd_writer(anno_path)
 
         for j in range(len(depth_images)):
@@ -102,9 +104,25 @@ def converter():
             #print(pd.DataFrame(pcd.points))
             cloud_new = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".ply")
             #cloud_2 = PyntCloud(pd.DataFrame(cloud_new))
-            #print(cloud_2)
+            array1 = np.asarray(pcd.points)
+            array2 = np.asarray(pcd.colors)
+            #print(array2)
+            df = pd.DataFrame(cloud_new.points)
+            print(df[['x', 'y', 'z', 'red', 'green', 'blue']])
+
+            df.to_csv(str(npy_files) + "/" + str(j) + ".txt", index=False, header=False, sep=' ')
+            #with open(str(npy_files) + "/" + str(j) + ".txt", 'w') as f:
+            #    dfstring = df.to_string(header=False, index=False)
+            #    f.write(dfstring)
+
+            #np.savetxt(str(npy_files) + "/" + str(j) + ".txt", df[['x', 'y', 'z', 'red', 'green', 'blue']], fmt='%d')
             #cloud_2.to_file(str(npy_files) + "/" + str(j) + ".npz")
-            cloud_new.to_file(str(npy_files) + "/" + str(j) + ".txt")
+            #o3d.io.write_point_cloud(str(npy_files) + "/" + str(j) + ".txt", pcd)
+            #cloud_new.to_file(str(npy_files) + "/" + str(j) + ".txt", cloud_new.points)
+                            # sep=" ",
+                            # header=0,
+                            # points=["x","y","z"])
+            cloud_new.to_file(str(bin_files) + "/" + str(j) + ".bin")
             #
             # #debugging
             # npzfile = np.load(str(npy_files) + "/" + str(j) + ".npz")
