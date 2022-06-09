@@ -30,7 +30,7 @@ def structure_maker():
     txt_files_path = []
     for i in range(len(dataset_path)):
         #dirName = "/home/iiwa-2/Downloads/Datasets/" + dataset_name + "/dataset/sequences/0" + str(i)
-        dirName = "/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/mmdet3d/data/s3dis/FLW_dataset/Scene0" + str(i)
+        dirName = "/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/mmdet3d/data/s3dis/FLW_dataset/0" + str(i)
         shutil.rmtree(dirName, ignore_errors=True)
         #os.makedirs(dirName)
         txt_files_path.append(sorted(glob.glob(dataset_path[i] + "/npy/*")))
