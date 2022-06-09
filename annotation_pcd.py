@@ -22,12 +22,6 @@ from pyvista import examples
 from pyntcloud import PyntCloud
 import pandas as pd
 
-# from pcd_new_converter import
-# device = o3d.core.Device("CPU:0")
-# dtype = o3d.core.float32
-# dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
-
-# object_path = sorted(glob.glob("/home/iiwa-2/Downloads/hope_models/models/*ply"))
 
 dataset = input("Choose Dataset or enter path:")
 if dataset == str(1):
@@ -55,14 +49,8 @@ def json_loader(dataset_no):
         json_path = dataset_path[i] + "/scene_gt.json"
         print(json_path)
         file = open(json_path)
-        # shutil.rmtree(dataset_path[i] + "/pcd_annotated", ignore_errors=True)
-        # print("Removing old pcd_annotated")
-        # os.mkdir(path + "/pcd_annotated")
         dict = json.load(file)
-        # print(dict, len(dict['1']))
 
-        # print(dict['0'][0])
-        # pcd = o3d.t.geometry.PointCloud(device)
         for scene_id in range(len(dict)):
             global instance_id
             global obj_ids
@@ -72,14 +60,7 @@ def json_loader(dataset_no):
             global cloud_annotation_data
             cloud_annotation_data = list()
             pcd_path = output_dataset[i] + "/pcd/" + str(scene_id) + ".ply"
-            # if not os.path.exists(pcd_path):
-            #     break
-            #     #os.mkdir(txt_path)
-            #     #print("Directory ", pcd_img,  " Created ")
-            # else:
-            #     print("Directory ", pcd_path,  " does not exists... waiting for next")
-            #     time.sleep(100)
-            # print(pcd_path)
+
             cloud = PyntCloud.from_file(pcd_path)
             df = pd.DataFrame(cloud.points)
             path_annot = sorted(glob.glob(os.path.join(output_dataset[i], '*')))
@@ -161,57 +142,10 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
         if flag:
             print("removing old Object which is out of scene")
             os.remove(txt_path)
-        # os.mkdir(txt_path)
-        # print("Directory ", pcd_img,  " Created ")
-        # print("/object" + str(objts-1) + "_" + str(inst) + ".txt")
-        # print("sample" + path_annotation[62:] + " obj no." + str(objts-1))
-        # print("Directory and file ", txt_path,  " already exists... skipping to next")
 
-    # for colors in scene.points:
-    #
-    # df_color = pd.DataFrame(scene2.points)
-    # print(df_color[['red', 'green', 'blue']])
-
-    # debugging
-    # pcd_read = o3d.io.read_point_cloud(path+"/pcd/" + str(objts) + ".ply")
-    # print("last check")
-    o3d.visualization.draw_geometries([scene, pcd_t])  # debug
+    #o3d.visualization.draw_geometries([scene, pcd_t])  # debug
 
     return objts, seg_points, inst, objts
-
-    # print(obj_data["point_indices"], len(obj_data["point_indices"]))
-    # print(seg_points, len(seg_points))
-    # print(pcd_tree.set_matrix_data(seg_points))
-
-    # print(obj_ids)
-
-    # print(point_cloud)
-
-    # o3d.io.write_point_cloud("/home/iiwa-2/Downloads/demo_pcd" + "/" + str(scn_id) + ".pcd", point_cloud)
-
-    # o3d.visualization.draw_geometries([scene])
-    # obj_data = {"obj_id": str(objts),
-    #             "instance": str(instance_id.count(objts)),
-    #             "point_indices": list(map(str, seg_idx))
-    #             }
-
-    # cloud_annotation_data.append(obj_data)
-
-    # cloud = pypcd.PointCloud.from_path(pcd_path)
-    # pprint.pprint(cloud.get_metadata()) # debug
-    # print(cloud.pc_data['width'])
-
-    # print(cloud.pc_data.view(np.float32).reshape(cloud.pc_data.shape + (-1,)))
-    # cloud = PyntCloud.from_file(pcd_path)
-    # pcl = o3d.t.geometry.PointCloud(device)
-    # scene.point["obj_ids"] = o3d.core.Tensor(obj_ids, o3d.core.int32, device)
-
-
-# o3d.io.write_point_cloud(str(path + "/pcd_annotated") + "/" + str(j) + ".pcd", pcd)
-# print()
-
-# print(obj_data)
-# o3d.visualization.draw_geometries([pcd_m, pcd_t]) # debug
 
 
 def spawn_process(number):
