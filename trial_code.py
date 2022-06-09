@@ -385,3 +385,31 @@ pipeline.run_test()
 # vis = ml3d.vis.Visualizer()
 # vis.visualize_dataset(dataset, 'training', indices=range(100))
 
+
+
+def annotator():
+    pcd_m = o3d.io.read_point_cloud(dataset_path[0] + "/pcd/0.pcd")
+    pcd = o3d.io.read_point_cloud(object_path[15])
+    pcd.points = o3d.utility.Vector3dVector(
+        np.array(pcd.points) / 1000)
+    T = np.eye(4)
+    # T[:3, :3] =
+
+
+def cloud_loader(path):
+    cloud_path = path + "/pcd/" + str(0) + ".pcd"
+    cloud = pypcd.PointCloud.from_path(cloud_path)
+    # pprint.pprint(cloud.get_metadata())
+    # print(cloud.pc_data[:])
+
+
+# cloud_loader(dataset_path[0])
+
+# def f(name):
+#     print('hello, ', name)
+#     json_loader()
+#
+# if __name__ == '__main__':
+#     p = Process(target=f, args=('Running the process',))
+#     p.start()
+#     p.join()
