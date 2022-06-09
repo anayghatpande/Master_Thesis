@@ -25,9 +25,9 @@ import pandas as pd
 # from pcd_new_converter import
 # device = o3d.core.Device("CPU:0")
 # dtype = o3d.core.float32
-#dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
+# dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
 
-#object_path = sorted(glob.glob("/home/iiwa-2/Downloads/hope_models/models/*ply"))
+# object_path = sorted(glob.glob("/home/iiwa-2/Downloads/hope_models/models/*ply"))
 
 dataset = input("Choose Dataset or enter path:")
 if dataset == str(1):
@@ -55,9 +55,9 @@ def json_loader(dataset_no):
         json_path = dataset_path[i] + "/scene_gt.json"
         print(json_path)
         file = open(json_path)
-        #shutil.rmtree(dataset_path[i] + "/pcd_annotated", ignore_errors=True)
-        #print("Removing old pcd_annotated")
-        #os.mkdir(path + "/pcd_annotated")
+        # shutil.rmtree(dataset_path[i] + "/pcd_annotated", ignore_errors=True)
+        # print("Removing old pcd_annotated")
+        # os.mkdir(path + "/pcd_annotated")
         dict = json.load(file)
         # print(dict, len(dict['1']))
 
@@ -79,12 +79,12 @@ def json_loader(dataset_no):
             # else:
             #     print("Directory ", pcd_path,  " does not exists... waiting for next")
             #     time.sleep(100)
-            #print(pcd_path)
+            # print(pcd_path)
             cloud = PyntCloud.from_file(pcd_path)
             df = pd.DataFrame(cloud.points)
             path_annot = sorted(glob.glob(os.path.join(output_dataset[i], '*')))
-            #print(path_annot)
-            #os.mkdir(path + "/pcd_annotated/" + str(scene_id))
+            # print(path_annot)
+            # os.mkdir(path + "/pcd_annotated/" + str(scene_id))
 
             # print("scene no. ", scene_id)
             for no_of_objs in range(len(dict[str(scene_id)])):
@@ -98,12 +98,16 @@ def json_loader(dataset_no):
                 Tr = np.array(camT)
                 shape = (3, 1)
                 matT = Tr.reshape(shape)
+                print(objects, scene_id)
+
                 object_data = transform(matR, matT, objects, pcd_path, path_annot[scene_id])
 
         print("PCD Annotated", scene_id)
 
 
 def transform(matr, matt, objts, pcd_path, path_annotation):
+    print(pcd_path)
+    print(object_path[objts - 1])
     scene = o3d.io.read_point_cloud(pcd_path)  # load scene
     pcd_obj = o3d.io.read_point_cloud(object_path[objts - 1])  # load object
 
@@ -127,29 +131,87 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
         [k, idx, _] = pcd_tree.search_radius_vector_3d(point, 0.005)
         # np.asarray(scene.colors)[idx[1:], :] = [0, 1, 0]
         seg_points[idx[1:]] = objts
-        #print(np.asarray(scene.colors))
+        # print(np.asarray(scene.colors))
 
     seg_idx = np.where(seg_points == objts)[0]
     obj_data = {"type": str(objts),
                 "instance": str(instance_id.count(objts)),
                 "point_indices": list(map(str, seg_idx))
                 }
-    #print(seg_points[idx])
+    # print(seg_points[idx])
     scene2 = PyntCloud.from_file(pcd_path)
-    #print(seg_idx)
-    color_data= np.asarray(scene.colors)[seg_idx] * 255
-    xyz_data= np.asarray(scene.points)[seg_idx]
+
+    # print(seg_idx)
+    color_data = np.asarray(scene.colors)[seg_idx] * 255
+    xyz_data = np.asarray(scene.points)[seg_idx]
+    flag = not np.any(color_data)
 
     df_obj_color = pd.DataFrame(color_data, dtype=int, index=None)
     df_obj_xyz = pd.DataFrame(xyz_data, index=None)
     df_obj = pd.concat([df_obj_xyz, df_obj_color], axis=1)
-    #print(df_obj)
-    txt_path = path_annotation + "/object" + str(objts-1) + "_" + str(inst) + ".txt"
+    # print(df_obj)
+    txt_path = path_annotation + "/object" + str(objts - 1) + "_" + str(inst) + ".txt"
     if not os.path.exists(txt_path):
-        df_obj.to_csv(txt_path, index=False, header=False, sep=' ')
-        print("writing sample" + path_annotation[62:] + " obj no." + str(objts-1))
+        if flag:
+            print("Object out of scene")
+        else:
+            df_obj.to_csv(txt_path, index=False, header=False, sep=' ')
+        print("writing sample" + path_annotation[62:] + " obj no." + str(objts - 1))
+    else:
+        if flag:
+            print("removing old Object which is out of scene")
+            os.remove(txt_path)
+        # os.mkdir(txt_path)
+        # print("Directory ", pcd_img,  " Created ")
+        # print("/object" + str(objts-1) + "_" + str(inst) + ".txt")
+        # print("sample" + path_annotation[62:] + " obj no." + str(objts-1))
+        # print("Directory and file ", txt_path,  " already exists... skipping to next")
+
+    # for colors in scene.points:
+    #
+    # df_color = pd.DataFrame(scene2.points)
+    # print(df_color[['red', 'green', 'blue']])
+
+    # debugging
+    # pcd_read = o3d.io.read_point_cloud(path+"/pcd/" + str(objts) + ".ply")
+    # print("last check")
+    o3d.visualization.draw_geometries([scene, pcd_t])  # debug
 
     return objts, seg_points, inst, objts
+
+    # print(obj_data["point_indices"], len(obj_data["point_indices"]))
+    # print(seg_points, len(seg_points))
+    # print(pcd_tree.set_matrix_data(seg_points))
+
+    # print(obj_ids)
+
+    # print(point_cloud)
+
+    # o3d.io.write_point_cloud("/home/iiwa-2/Downloads/demo_pcd" + "/" + str(scn_id) + ".pcd", point_cloud)
+
+    # o3d.visualization.draw_geometries([scene])
+    # obj_data = {"obj_id": str(objts),
+    #             "instance": str(instance_id.count(objts)),
+    #             "point_indices": list(map(str, seg_idx))
+    #             }
+
+    # cloud_annotation_data.append(obj_data)
+
+    # cloud = pypcd.PointCloud.from_path(pcd_path)
+    # pprint.pprint(cloud.get_metadata()) # debug
+    # print(cloud.pc_data['width'])
+
+    # print(cloud.pc_data.view(np.float32).reshape(cloud.pc_data.shape + (-1,)))
+    # cloud = PyntCloud.from_file(pcd_path)
+    # pcl = o3d.t.geometry.PointCloud(device)
+    # scene.point["obj_ids"] = o3d.core.Tensor(obj_ids, o3d.core.int32, device)
+
+
+# o3d.io.write_point_cloud(str(path + "/pcd_annotated") + "/" + str(j) + ".pcd", pcd)
+# print()
+
+# print(obj_data)
+# o3d.visualization.draw_geometries([pcd_m, pcd_t]) # debug
 
 
 def spawn_process(number):
@@ -157,9 +219,6 @@ def spawn_process(number):
 
 
 if __name__ == '__main__':
-    max_processes = 30
-
-    print(f'Start {max_processes} processes')
 
     all_processes = mp.Process(target=json_loader, args=(dataset_name,))
     all_processes.start()
