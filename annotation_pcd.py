@@ -1,3 +1,4 @@
+import datetime
 import glob
 import time
 from multiprocessing import Process
@@ -12,7 +13,7 @@ import os
 from functools import partial
 import multiprocessing as mp
 from multiprocessing.pool import Pool
-from time import time
+from datetime import datetime
 import shutil
 import copy
 from pypcd import pypcd
@@ -27,12 +28,13 @@ dataset = input("Choose Dataset or enter path:")
 if dataset == str(1):
     dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/hope_val/val/*"))
     object_path = sorted(glob.glob("/home/iiwa-2/Downloads/hope_models/models/*ply"))
-    output_dataset = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/open3D/data/s3dis/FLW_dataset/*"))
+    output_dataset = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/open3D/data/s3dis/FLW_dataset/*"), key=os.path.basename)
     dataset_name = "HOPE"
 elif dataset == str(2):
     dataset_path = sorted(glob.glob("/home/iiwa-2/Downloads/Datasets/ycbv/train_pbr/*"))
     object_path = sorted(glob.glob("/home/iiwa-2/Downloads/ycbv_models/models/*ply"))
-    output_dataset = sorted(glob.glob("/media/iiwa-2/MEDIA/YCB_S3DIS/open3D/data/s3dis/FLW_dataset/*"))
+    output_dataset = sorted(glob.glob("/media/iiwa-2/MEDIA/YCB_S3DIS/open3D/data/s3dis/FLW_dataset/*"), key=len)
+    #print(*output_dataset, sep='\n')
     dataset_name = "YCB-V"
 else:
     dataset_path = dataset
@@ -47,9 +49,10 @@ def json_loader(dataset_no):
     print("Selected Dataset is: ", str(dataset_no))
     for i in range(len(dataset_path)):
         json_path = dataset_path[i] + "/scene_gt.json"
-        print(json_path)
+        print(json_path, datetime.now())
         file = open(json_path)
         dict = json.load(file)
+        print(output_dataset[i])
 
         for scene_id in range(len(dict)):
             global instance_id
@@ -60,14 +63,16 @@ def json_loader(dataset_no):
             global cloud_annotation_data
             cloud_annotation_data = list()
             pcd_path = output_dataset[i] + "/pcd/" + str(scene_id) + ".ply"
+            #print(pcd_path)
 
-            cloud = PyntCloud.from_file(pcd_path)
-            df = pd.DataFrame(cloud.points)
-            path_annot = sorted(glob.glob(os.path.join(output_dataset[i], '*')))
-            # print(path_annot)
+            #cloud = PyntCloud.from_file(pcd_path)
+            #df = pd.DataFrame(cloud.points)
+            path_annot = os.path.join(output_dataset[i], str(scene_id))
+            #print(path_annot)
+
             # os.mkdir(path + "/pcd_annotated/" + str(scene_id))
 
-            # print("scene no. ", scene_id)
+            print("sample " + str(scene_id) + " of scene " + str(i))
             for no_of_objs in range(len(dict[str(scene_id)])):
                 # print(objs, dict[str(scene_id)][objs]['obj_id'])
                 objects = dict[str(scene_id)][no_of_objs]['obj_id']
@@ -79,16 +84,23 @@ def json_loader(dataset_no):
                 Tr = np.array(camT)
                 shape = (3, 1)
                 matT = Tr.reshape(shape)
-                print(objects, scene_id)
+                #print(objects, scene_id)
+                #print(path_annot)
+                object_data = transform(matR, matT, objects, pcd_path, path_annot)
+                # if not os.path.exists(path_annot):
+                #     object_data = transform(matR, matT, objects, pcd_path, path_annot)
+                # else:
+                #     print("path exists skipping for ", scene_id)
 
-                object_data = transform(matR, matT, objects, pcd_path, path_annot[scene_id])
 
-        print("PCD Annotated", scene_id)
+
+        x = output_dataset[i].split('/')
+        print("PCD Annotated at " + str(datetime.now()), x[-1])
 
 
 def transform(matr, matt, objts, pcd_path, path_annotation):
-    print(pcd_path)
-    print(object_path[objts - 1])
+    #print(pcd_path)
+    #print(object_path[objts - 1])
     scene = o3d.io.read_point_cloud(pcd_path)  # load scene
     pcd_obj = o3d.io.read_point_cloud(object_path[objts - 1])  # load object
 
@@ -125,22 +137,27 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
     # print(seg_idx)
     color_data = np.asarray(scene.colors)[seg_idx] * 255
     xyz_data = np.asarray(scene.points)[seg_idx]
-    flag = not np.any(color_data)
+    #flag = not np.any(color_data) or not np.any(xyz_data)
 
     df_obj_color = pd.DataFrame(color_data, dtype=int, index=None)
     df_obj_xyz = pd.DataFrame(xyz_data, index=None)
     df_obj = pd.concat([df_obj_xyz, df_obj_color], axis=1)
     # print(df_obj)
     txt_path = path_annotation + "/object" + str(objts - 1) + "_" + str(inst) + ".txt"
+    #print("object data", df_obj.shape)
+
+    #print(path_annotation)
+
+
     if not os.path.exists(txt_path):
-        if flag:
-            print("Object out of scene")
+        if df_obj.shape < (50, 6):
+            print(str(objts - 1), "Object out of instance sample " + path_annotation[62:])
         else:
             df_obj.to_csv(txt_path, index=False, header=False, sep=' ')
-        print("writing sample" + path_annotation[62:] + " obj no." + str(objts - 1))
+        #print("writing sample" + path_annotation[62:] + " obj no." + str(objts - 1))
     else:
-        if flag:
-            print("removing old Object which is out of scene")
+        if df_obj.shape < (50, 6):
+            print("removing old Object which is out of instance")
             os.remove(txt_path)
 
     #o3d.visualization.draw_geometries([scene, pcd_t])  # debug
