@@ -51,13 +51,15 @@ def load_json(data_path):
 
 def rgb_reader(r):
     # reading all rgb images
-    rgb_path = sorted(glob.glob(r + "/rgb/*"))
+    rgb_path = sorted(glob.glob(r + "/rgb/*"), key=os.path.basename)
+    #print(*rgb_path, sep='\n')
     return rgb_path
 
 
 def depth_reader(d):
     # reading all depth images
-    depth_path = sorted(glob.glob(d + "/depth/*"))
+    depth_path = sorted(glob.glob(d + "/depth/*"), key=os.path.basename)
+    #print(*depth_path, sep='\n')
     return depth_path
 
 
@@ -85,6 +87,8 @@ def converter():
         depth_images = depth_reader(dataset[i])
         pcd_path = str(output_dataset) + str(i) + "/pcd/"
         npy_path = str(output_dataset) + str(i) + "/"
+        #print(pcd_path, npy_path)
+
         #bin_path = str(dataset[i]) + "/bin"
         #anno_path = str(dataset[i]) + "/annotations"
         pcd_img = pcd_writer(pcd_path)
@@ -93,6 +97,7 @@ def converter():
         #annotations = pcd_writer(anno_path)
 
         for j in range(len(depth_images)):
+            #print(rgb_images[j], depth_images[j])
             color_raw = cv2.imread(rgb_images[j])
             img = np.array(color_raw)
             color_raw = cv2.cvtColor(color_raw, cv2.COLOR_BGR2RGB)
@@ -107,14 +112,18 @@ def converter():
             pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
             #o3d.visualization.draw_geometries([pcd]) #debug
             txt_path = npy_path + str(j) + "/"
+            shutil.rmtree(txt_path, ignore_errors=True)
+            #os.remove(txt_path)
 
-            ply_file_path = str(pcd_img) + "/" + str(j) + ".ply"
-            if not os.path.exists(ply_file_path):
-                o3d.io.write_point_cloud(ply_file_path, pcd)
-                #os.mkdir(txt_path)
-                #print("Directory ", pcd_img,  " Created ")
-            else:
-                print("Directory ", ply_file_path,  " already exists... skipping to next")
+            ply_file_path = str(pcd_img) + str(j) + ".ply"
+            #print(ply_file_path)
+            o3d.io.write_point_cloud(ply_file_path, pcd)
+            # if not os.path.exists(ply_file_path):
+            #     o3d.io.write_point_cloud(ply_file_path, pcd)
+            #     #os.mkdir(txt_path)
+            #     #print("Directory ", pcd_img,  " Created ")
+            # else:
+            #     print("Directory ", ply_file_path,  " already exists... skipping to next")
 
             if not os.path.exists(txt_path):
                 os.mkdir(txt_path)
@@ -124,12 +133,12 @@ def converter():
 
 
             #print(pd.DataFrame(pcd.points))
-            cloud_new = PyntCloud.from_file(str(pcd_img) + "/" + str(j) + ".ply")
+            #cloud_new = PyntCloud.from_file(str(pcd_img) + str(j) + ".ply")
             #cloud_2 = PyntCloud(pd.DataFrame(cloud_new))
-            array1 = np.asarray(pcd.points)
-            array2 = np.asarray(pcd.colors)
+            #array1 = np.asarray(pcd.points)
+            #array2 = np.asarray(pcd.colors)
             #print(array2)
-            df = pd.DataFrame(cloud_new.points)
+            #df = pd.DataFrame(cloud_new.points)
             #print(df[['x', 'y', 'z', 'red', 'green', 'blue']])
 
             #df.to_csv(txt_path + str(j) + ".txt", index=False, header=False, sep=' ')
