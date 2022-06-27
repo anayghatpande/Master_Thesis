@@ -30,7 +30,7 @@ else:
 
 #dataset_path = "/home/iiwa-2/Downloads/hope_val/val/000001"
 dataset_read = sorted(glob.glob(dataset_path + "/*"))
-print("Removing old POINT-CLOUDS...")
+#print("Removing old POINT-CLOUDS...")
 
 
 def load_json(data_path):
@@ -112,24 +112,24 @@ def converter():
             pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
             #o3d.visualization.draw_geometries([pcd]) #debug
             txt_path = npy_path + str(j) + "/"
-            shutil.rmtree(txt_path, ignore_errors=True)
+            #shutil.rmtree(txt_path, ignore_errors=True)
             #os.remove(txt_path)
 
-            ply_file_path = str(pcd_img) + str(j) + ".ply"
+            ply_file_path = str(pcd_path) + str(j) + ".ply"
             #print(ply_file_path)
-            o3d.io.write_point_cloud(ply_file_path, pcd)
-            # if not os.path.exists(ply_file_path):
-            #     o3d.io.write_point_cloud(ply_file_path, pcd)
-            #     #os.mkdir(txt_path)
-            #     #print("Directory ", pcd_img,  " Created ")
-            # else:
-            #     print("Directory ", ply_file_path,  " already exists... skipping to next")
-
-            if not os.path.exists(txt_path):
+            #o3d.io.write_point_cloud(ply_file_path, pcd)
+            if not os.path.exists(ply_file_path):
+                o3d.io.write_point_cloud(ply_file_path, pcd)
                 os.mkdir(txt_path)
                 #print("Directory ", pcd_img,  " Created ")
             else:
-                print("Directory ", txt_path,  " already exists... skipping to next")
+                print("Directory ", ply_file_path,  " already exists... skipping to next")
+
+            # if not os.path.exists(txt_path):
+            #     os.mkdir(txt_path)
+            #     #print("Directory ", pcd_img,  " Created ")
+            # else:
+            #     print("Directory ", txt_path,  " already exists... skipping to next")
 
 
             #print(pd.DataFrame(pcd.points))
