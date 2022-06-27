@@ -52,7 +52,7 @@ def json_loader(dataset_no):
         print(json_path, datetime.now())
         file = open(json_path)
         dict = json.load(file)
-        print(output_dataset[i])
+        #print(output_dataset[i])
 
         for scene_id in range(len(dict)):
             global instance_id
@@ -159,10 +159,14 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
         if df_obj.shape < (50, 6):
             print("removing old Object which is out of instance")
             os.remove(txt_path)
+        else:
+            print("Skipping to next")
 
     #o3d.visualization.draw_geometries([scene, pcd_t])  # debug
 
     return objts, seg_points, inst, objts
+
+
 
 
 def spawn_process(number):
