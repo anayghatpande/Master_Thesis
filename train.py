@@ -18,15 +18,12 @@ framework = "torch"  # or tf
 cfg_file = "/home/iiwa-2/Frameworks/Open3D-ML/ml3d/configs/kpconv_FLW_YCB.yml"
 cfg = _ml3d.utils.Config.load_from_file(cfg_file)
 
-# Point Transformer MODEL
-# cfg_file = "/home/iiwa-2/Frameworks/Open3D-ML/ml3d/configs/pointtransformer_FLW.yml"
-# cfg = _ml3d.utils.Config.load_from_file(cfg_file)
-
 dataset_name = 'FLWDATASETS3DIS'
 # model = ml3d.models.KPFCNN(**cfg.model)
 dataset_path = "/media/iiwa-2/MEDIA/YCB_S3DIS/open3D/data/s3dis/FLW_data"
 # dataset_path_S3DIS ="/home/iiwa-2/Downloads/Stanford3dDataset_v1.2"
 dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path, name=dataset_name)
+#test_split = dataset.get_split('validation')
 # dataset_S3DIS =ml3d.datasets.S3DIS(dataset_path=dataset_path_S3DIS)
 # dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path,
 #                                       cache_dir='./logs/cache',
@@ -45,8 +42,6 @@ dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path, name=dataset_
 # create the model with initialization.
 
 model = KPFCNN(**cfg.model)
-
-#model = PointTransformer(**cfg.model)
 
 #
 pipeline = SemanticSegmentation(model, dataset=dataset, device="gpu", num_workers=0, pin_memory=False,  **cfg.pipeline)
