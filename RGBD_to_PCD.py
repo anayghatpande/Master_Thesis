@@ -102,7 +102,7 @@ def load_frm_json(dataset_path, output_dataset):
     #print(dict)
 
     for scene_id in range(len(dict)):
-        path_annot = os.path.join(output_dataset, str(scene_id))
+
         matR_data = []
         matT_data = []
         objts = []
@@ -110,7 +110,7 @@ def load_frm_json(dataset_path, output_dataset):
         global obj_ids
         instance_id = []
         obj_ids = []
-        #print(scene_id)
+
         for no_of_objs in range(len(dict[str(scene_id)])):
             # print(objs, dict[str(scene_id)][objs]['obj_id'])
             objects = dict[str(scene_id)][no_of_objs]['obj_id']
@@ -126,6 +126,8 @@ def load_frm_json(dataset_path, output_dataset):
             matR_data.append(matR)
             matT_data.append(matT)
             objts.append(objects)
+            #print(scene_id)
+            path_annot = os.path.join(output_dataset, str(scene_id))
         return matR_data, matT_data, objts, path_annot
             #transformer(matR, matT, objects, pcd, path_annot)
 
@@ -203,8 +205,9 @@ def transformer(matr, matt, objts, path_annotation, pcd_data):
     df_obj_color = pd.DataFrame(color_data, dtype=int, index=None)
     df_obj_xyz = pd.DataFrame(xyz_data, index=None)
     df_obj = pd.concat([df_obj_xyz, df_obj_color], axis=1)
-    print(df_obj)
+    #print(df_obj)
     txt_path = path_annotation + "/object" + str(objts - 1) + "_" + str(inst) + ".txt"
+    print(txt_path)
     #print("object data", df_obj.shape)
 
     #print(path_annotation)
@@ -263,8 +266,10 @@ for i in range(len(dataset)):
     object_data = load_frm_json(dataset[i], output_dataset[i])
 
     x = converter(rgb_images, depth_images)
-    #print(x[1])
-    print(object_data[0][1], object_data[1][1])
+    print(x)
+    #print(object_data[0][1], object_data[1][1])
     for t in range(len(x)):
-        transformer(object_data[0][t], object_data[1][t], object_data[2][t], object_data[3][t], x[t])
+        #print(len(x[1]))
+        print(t, object_data[0][t])
+        #transformer(object_data[0][t], object_data[1][t], object_data[2][t], object_data[3], x[t])
 
