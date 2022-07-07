@@ -149,18 +149,18 @@ def transform(matr, matt, objts, pcd_path, path_annotation):
     #print(path_annotation)
 
 
-    if not os.path.exists(txt_path):
-        if df_obj.shape < (50, 6):
-            print(str(objts - 1), "Object out of instance sample " + path_annotation[62:])
-        else:
-            df_obj.to_csv(txt_path, index=False, header=False, sep=' ')
-        #print("writing sample" + path_annotation[62:] + " obj no." + str(objts - 1))
-    else:
-        if df_obj.shape < (50, 6):
-            print("removing old Object which is out of instance")
-            os.remove(txt_path)
-        else:
-            print("Skipping to next")
+    # if not os.path.exists(txt_path):
+    #     if df_obj.shape < (50, 6):
+    #         print(str(objts - 1), "Object out of instance sample " + path_annotation[62:])
+    #     else:
+    #         df_obj.to_csv(txt_path, index=False, header=False, sep=' ')
+    #     #print("writing sample" + path_annotation[62:] + " obj no." + str(objts - 1))
+    # else:
+    #     if df_obj.shape < (50, 6):
+    #         print("removing old Object which is out of instance")
+    #         os.remove(txt_path)
+    #     else:
+    #         print("Skipping to next")
 
     #o3d.visualization.draw_geometries([scene, pcd_t])  # debug
 
