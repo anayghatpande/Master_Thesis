@@ -13,6 +13,7 @@ from torch.testing._internal.common_utils import args
 
 framework = "torch"  # or tf
 
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 # KPCONV MODEL
 #cfg_file = "/Open3D-ML/ml3d/configs/kpvconv_FLW_HOPE.yml"
 cfg_file = "/home/iiwa-2/Frameworks/Open3D-ML/ml3d/configs/kpconv_FLW_YCB.yml"
@@ -20,6 +21,7 @@ cfg = _ml3d.utils.Config.load_from_file(cfg_file)
 
 dataset_name = 'FLWDATASETS3DIS'
 # model = ml3d.models.KPFCNN(**cfg.model)
+
 dataset_path = "/media/iiwa-2/MEDIA/YCB_S3DIS/open3D/data/s3dis/FLW_data"
 # dataset_path_S3DIS ="/home/iiwa-2/Downloads/Stanford3dDataset_v1.2"
 dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path, name=dataset_name)
