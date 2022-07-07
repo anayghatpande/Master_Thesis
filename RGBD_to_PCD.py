@@ -16,16 +16,17 @@ from multiprocessing.pool import Pool
 from datetime import datetime
 import shutil
 import copy
-from pypcd import pypcd
-import pprint
-import pyvista as pv
-from pyvista import examples
-from pyntcloud import PyntCloud
+from open3d.ml.datasets.utils import DataProcessing, get_min_bbox, BEVBox3D
 import pandas as pd
 import _thread
 import threading
 import time
-
+import os, glob, pickle
+from pathlib import Path
+from os.path import join, exists, dirname, abspath, isdir
+from sklearn.neighbors import KDTree
+from tqdm import tqdm
+import logging
 
 # reading dataset path
 dataset = input("Choose Dataset or enter path:")
@@ -94,42 +95,48 @@ def bin_remover(path):
 dataset = list(dataset_path)
 config = load_json(dataset_path[0])
 
-def load_frm_json(dataset_path, output_dataset):
-    json_path = dataset_path + "/scene_gt.json"
-    print(json_path, datetime.now())
-    file = open(json_path)
-    dict = json.load(file)
-    #print(dict)
+def load_frm_json(dataset_path, output_dataset, pcd_data):
+        json_path = dataset_path + "/scene_gt.json"
+        print(json_path, datetime.now())
+        file = open(json_path)
+        dict = json.load(file)
+        #print(output_dataset[i])
 
-    for scene_id in range(len(dict)):
+        for scene_id in range(len(dict)):
+            global instance_id
+            global obj_ids
+            instance_id = []
+            obj_ids = []
+            labels = []
+            objts = []
+            # global cloud_annotation_data
+            # cloud_annotation_data = list()
+            #pcd_path = output_dataset[i] + "/pcd/" + str(scene_id) + ".ply"
+            #print(pcd_path)
 
-        matR_data = []
-        matT_data = []
-        objts = []
-        global instance_id
-        global obj_ids
-        instance_id = []
-        obj_ids = []
-
-        for no_of_objs in range(len(dict[str(scene_id)])):
-            # print(objs, dict[str(scene_id)][objs]['obj_id'])
-            objects = dict[str(scene_id)][no_of_objs]['obj_id']
-            camR = dict[str(scene_id)][no_of_objs]['cam_R_m2c']
-            camT = dict[str(scene_id)][no_of_objs]['cam_t_m2c']
-            R = np.array(camR)
-            shape = (3, 3)
-            matR = R.reshape(shape)
-            Tr = np.array(camT)
-            shape = (3, 1)
-            matT = Tr.reshape(shape)
-            #print(matR, scene_id)
-            matR_data.append(matR)
-            matT_data.append(matT)
-            objts.append(objects)
-            #print(scene_id)
+            #cloud = PyntCloud.from_file(pcd_path)
+            #df = pd.DataFrame(cloud.points)
             path_annot = os.path.join(output_dataset, str(scene_id))
-        return matR_data, matT_data, objts, path_annot
-            #transformer(matR, matT, objects, pcd, path_annot)
+            print(path_annot)
+
+            # os.mkdir(path + "/pcd_annotated/" + str(scene_id))
+
+            #print("sample " + str(scene_id) + " of scene " + str(i))
+            for no_of_objs in range(len(dict[str(scene_id)])):
+                # print(objs, dict[str(scene_id)][objs]['obj_id'])
+                objects = dict[str(scene_id)][no_of_objs]['obj_id']
+                camR = dict[str(scene_id)][no_of_objs]['cam_R_m2c']
+                camT = dict[str(scene_id)][no_of_objs]['cam_t_m2c']
+                R = np.array(camR)
+                shape = (3, 3)
+                matR = R.reshape(shape)
+                Tr = np.array(camT)
+                shape = (3, 1)
+                matT = Tr.reshape(shape)
+                objts.append(objects)
+            #print(scene_id, objts)
+                #print(path_annot)
+                object_data = transformer(matR, matT, objects, path_annot, pcd_data)
 
 
 #print(depth_images, len(depth_images))
@@ -258,18 +265,70 @@ def transformer(matr, matt, objts, path_annotation, pcd_data):
 # thread1.start()
 # thread2.start()
 
+def create_ply_files(dataset_path, class_names):
+        os.makedirs(join(dataset_path, 'original_pkl'), exist_ok=True)
+        anno_file = Path(dataset_path) / 'meta_data' / 'anno_paths.txt' # changes acc. to YCB'
+
+        anno_file = str(anno_file)
+        anno_paths = [line.rstrip() for line in open(anno_file)]
+        anno_paths = [Path(dataset_path) / p for p in anno_paths]
+
+        class_names = [val for key, val in class_names.items()]
+        label_to_idx = {l: i for i, l in enumerate(class_names)}
+
+        out_format = '.pkl'
+
+        for anno_path in tqdm(anno_paths):
+            elems = str(anno_path).split('/')
+            save_path = elems[-4] + '_' + elems[-3] + '_' + elems[-2] + '_' + elems[-1] + out_format
+            save_path = Path(dataset_path) / 'original_pkl' / save_path
+
+
+            data_list = []
+            bboxes = []
+            for file in glob.glob(str(anno_path / '*.txt')):
+                class_name = Path(file).name.split('_')[0]
+
+                #if class_name not in class_names:
+                 #   class_name = 'clutter'
+
+                pc = pd.read_csv(file, header=None,
+                                 delim_whitespace=True).values
+                labels = np.ones((pc.shape[0], 1)) * label_to_idx[class_name]
+                data_list.append(np.concatenate([pc, labels], 1))
+                bbox = [class_name] + get_min_bbox(pc)
+                bboxes.append(bbox)
+
+            pc_label = np.concatenate(data_list, 0)
+
+            info = [pc_label, bboxes]
+            if not os.path.exists(save_path):
+                with open(save_path, 'wb') as f:
+                    pickle.dump(info, f)
+            else:
+                print("file exists... skipping")
+
+
+
 
 for i in range(len(dataset)):
+    #print(len(dataset))
     #shutil.rmtree(output_dataset + str(i), ignore_errors=True)
     rgb_images = rgb_reader(dataset[i])
     depth_images = depth_reader(dataset[i])
-    object_data = load_frm_json(dataset[i], output_dataset[i])
 
-    x = converter(rgb_images, depth_images)
-    print(x)
+    pcd_data = converter(rgb_images, depth_images)
+    print(i, len(pcd_data))
+    for scn in range(len(pcd_data)):
+        print(pcd_data[scn])
+        load_data = load_frm_json(dataset[i], output_dataset[i], pcd_data[scn])
+    #print(len(object_data[0]), len(object_data[1]))
     #print(object_data[0][1], object_data[1][1])
-    for t in range(len(x)):
-        #print(len(x[1]))
-        print(t, object_data[0][t])
+    #for scn in range(len(x)):
+        #print(scn)
+        #for t in range(len(object_data[2])):
+            #print(len(x[1]))
+            #print("OBJECT " + str(object_data[2][t]))
+            #print("OBJECT " + str(object_data[2][t]) + "MATR " + str(object_data[0][t]) + "MATT " + str(object_data[1][t]))
         #transformer(object_data[0][t], object_data[1][t], object_data[2][t], object_data[3], x[t])
 
