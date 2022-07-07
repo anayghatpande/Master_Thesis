@@ -35,8 +35,6 @@ dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path, name=dataset_
 
 # train_split = dataset.get_split('training')
 # train_split = dataset_S3DIS.get_split('training')
-
-
 # training own model
 
 # use a cache for storing the results of the preprocessing (default path is './logs/cache')
