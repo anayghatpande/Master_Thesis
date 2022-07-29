@@ -5,6 +5,7 @@ import open3d.ml as _ml3d
 import open3d.ml.torch as ml3d
 from open3d.ml.torch.models import KPFCNN, PointTransformer
 from open3d.ml.torch.pipelines import SemanticSegmentation
+from configuration_file import *
 
 # from open3d.ml.datasets import FLWDataset
 
@@ -15,16 +16,22 @@ framework = "torch"  # or tf
 
 
 # Point Transformer MODEL
-cfg_file = "/home/iiwa-2/Frameworks/Open3D-ML/ml3d/configs/pointtransformer_FLW_HOPE.yml"
+cfg_file = "/home/iiwa-2/Frameworks/Open3D-ML/ml3d/configs/pointtransformer_FLW_YCB.yml"
 cfg = _ml3d.utils.Config.load_from_file(cfg_file)
 
-dataset_name = 'FLWDATASETS3DIS'
+dataset_name = dataset_config[3]
 
-#dataset_path = "/media/iiwa-2/MEDIA/YCB_S3DIS/open3D/data/s3dis/FLW_data"
-dataset_path = "/home/iiwa-2/Downloads/Datasets/HOPE_S3ID/open3D/data/s3dis/s3dis_data"
-#dataset_path = "/home/iiwa-2/Downloads/Stanford3dDataset_v1.2"
-# dataset_path_S3DIS ="/home/iiwa-2/Downloads/Stanford3dDataset_v1.2"
-dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path, name=dataset_name)
+dataset_path = dataset_config[5]
+if dataset_name == "FLWDATASETHOPE":
+    print("Selected Dataset: ", dataset_name)
+    dataset = ml3d.datasets.FLWDATASETHOPE(dataset_path=dataset_path, name=dataset_name)
+elif dataset_name == "FLWDATASETS3DIS":
+    print("Selected Dataset: ", dataset_name)
+    dataset = ml3d.datasets.FLWDATASETS3DIS(dataset_path=dataset_path, name=dataset_name)
+else:
+    print("adding new dataset please create proper file for it")
+    print("Selected Dataset: ", dataset_name)
+    dataset = ml3d.datasets.Custom3D(dataset_path=dataset_path, name=dataset_name)
 #dataset = ml3d.datasets.S3DIS(dataset_path=dataset_path, name=dataset_name)
 #test_split = dataset.get_split('validation')
 # dataset_S3DIS =ml3d.datasets.S3DIS(dataset_path=dataset_path_S3DIS)
