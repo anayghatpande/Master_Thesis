@@ -3,9 +3,11 @@ import numpy as np
 import os
 from os import path as osp
 import pandas as pd
+from configuration_file import *
 
-dataset_path = "/media/iiwa-2/MEDIA/YCB_S3DIS/open3D/data/s3dis"
-annotations = sorted(glob.glob(dataset_path + "/FLW_dataset/*"), key=os.path.getatime)
+dataset_path = dataset_config[0]
+print(dataset_path)
+annotations = sorted(glob.glob(dataset_path), key=os.path.getatime)
 anno_dir = dataset_path + "/meta_data/anno_paths.txt"
 class_path_dir = dataset_path + "/meta_data/class_names.txt"
 model_path = sorted(glob.glob("/home/iiwa-2/Downloads/ycbv_models/models/*.ply"))
@@ -73,5 +75,5 @@ def class_path_txt():
         #print()
         #print(osp.basename(path).split('_'))
 
-if __name__ == '__main__':
-    data_config()
+# if __name__ == '__main__':
+#     data_config()
